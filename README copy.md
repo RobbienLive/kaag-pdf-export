@@ -1,0 +1,206 @@
+# KAAG PDF Exports
+
+Een gecentraliseerde Python package voor het genereren van gestileerde PDF exports voor alle KAAG projecten met consistente branding.
+
+## Features
+
+- 🎨 **Unified Color Schemes** - KAA Gent branding kleuren
+- 🔤 **Custom Font Support** - Poppins, Obviously, IvyPresto
+- 📊 **Herbruikbare Componenten** - Headers, tabellen, radar charts, performance bars
+- 📄 **Meerdere Report Types** - Scouting reports, final reports, quick overviews
+
+## Installatie
+
+### Lokale Development
+
+```bash
+# Vanuit de kaag-pdf-exports directory
+pip install -e .
+```
+
+### Als Dependency in KAAG-BE
+
+```bash
+# In KAAG-BE requirements.txt toevoegen:
+-e ../kaag-pdf-exports
+# Of direct installeren:
+pip install -e ../kaag-pdf-exports
+```
+
+## Gebruik
+
+### Basic Usage
+
+```python
+from kaag_pdf import PDFGenerator, KAAG_COLORS
+
+# Maak een generator
+generator = PDFGenerator()
+
+# Genereer een PDF
+pdf_bytes = generator.create_report(
+    title="Speler Rapport",
+    subtitle="Seizoen 2024-2025",
+    content_callback=my_content_function,
+)
+
+# Opslaan
+with open("rapport.pdf", "wb") as f:
+    f.write(pdf_bytes)
+```
+
+### Color Scheme
+
+```python
+from kaag_pdf import ColorScheme, KAAG_COLORS, KAAG_COLORS_LIGHT
+
+# Gebruik standaard kleuren
+print(KAAG_COLORS.primary)  # (0, 57, 107) - KAA Gent blauw
+
+# Genormaliseerd voor ReportLab (0-1 range)
+r, g, b = KAAG_COLORS.primary_normalized()
+
+# Custom color scheme
+custom = ColorScheme(
+    primary=(100, 50, 200),
+    secondary=(200, 150, 100),
+    # ... other colors
+)
+```
+
+### Fonts
+
+```python
+from kaag_pdf import FontManager, FONTS, get_font
+
+# Automatische font registratie
+font_manager = FontManager()
+font_manager.register_fonts()
+
+# Get font name met fallback
+heading_font = get_font("HEADING", fallback="Helvetica-Bold")
+
+# Beschikbare font keys:
+# POPPINS_REGULAR, POPPINS_BOLD, POPPINS_SEMIBOLD, etc.
+# OBVIOUSLY_REGULAR, OBVIOUSLY_BOLD, OBVIOUSLY_SEMIBOLD
+# IVYPRESTO_REGULAR, IVYPRESTO_ITALIC
+# HEADING, SUBHEADING, BODY, BODY_BOLD, ACCENT, LABEL, SMALL
+```
+
+### Components
+
+```python
+from kaag_pdf.components import (
+    PDFHeader,
+    PDFFooter,
+    InfoBlock,
+    SectionHeader,
+    StatsTable,
+    RadarChart,
+    PerformanceBar,
+    RadarChartData,
+    PerformanceBarData,
+)
+
+# Radar Chart
+radar_data = RadarChartData(
+    labels=["Aanval", "Verdediging", "Passing", "Fysiek", "Mentaal"],
+    values=[75, 60, 80, 70, 85],
+    background_values=[50, 50, 50, 50, 50],  # Group average
+    title="Performance",
+)
+
+chart = RadarChart()
+chart.draw(canvas, center_x, center_y, radar_data)
+
+# Performance Bar
+bar_data = PerformanceBarData(
+    label="Doelpunten per 90",
+    value=0.45,
+    percentile=15.0,  # Top 15%
+)
+
+bar = PerformanceBar()
+bar.draw(canvas, x, y, bar_data)
+```
+
+### Styles
+
+```python
+from kaag_pdf import PDFStyles
+from kaag_pdf.styles import DEFAULT_STYLES, COMPACT_STYLES
+
+# Custom styles
+my_styles = PDFStyles(
+    page_margin_top=20 * mm,
+    font_size_title=28,
+    radar_chart_size=70 * mm,
+)
+
+generator = PDFGenerator(styles=my_styles)
+```
+
+## Fonts Installeren
+
+Kopieer font bestanden naar `src/kaag_pdf/assets/fonts/`:
+
+- `Poppins-Regular.ttf`
+- `Poppins-Bold.ttf`
+- `Poppins-SemiBold.ttf`
+- `Poppins-Light.ttf`
+- `Poppins-Medium.ttf`
+- `Obviously-Regular.ttf`
+- `Obviously-Bold.ttf`
+- `Obviously-SemiBold.ttf`
+- `IvyPrestoDisplay-Regular.otf`
+- `IvyPrestoDisplay-Italic.otf`
+
+## Project Structure
+
+```
+kaag-pdf-exports/
+├── setup.py
+├── README.md
+└── src/
+    └── kaag_pdf/
+        ├── __init__.py
+        ├── colors.py          # Color schemes
+        ├── fonts.py           # Font management
+        ├── styles.py          # PDF styling
+        ├── components.py      # Reusable components
+        ├── generator.py       # Base PDF generator
+        └── assets/
+            ├── fonts/         # TTF/OTF files
+            └── images/        # Logos, etc.
+```
+
+## API Reference
+
+### PDFGenerator
+
+De basis class voor PDF generatie met ingebouwde componenten.
+
+| Method | Description |
+|--------|-------------|
+| `create_report(title, subtitle, content_callback, data)` | Genereer complete PDF |
+| `new_page(canvas, title, subtitle)` | Start nieuwe pagina |
+| `check_page_break(canvas, current_y, needed_height, ...)` | Check of page break nodig is |
+| `draw_section(canvas, y, title)` | Teken section header |
+| `draw_info_block(canvas, y, items, title)` | Teken info block |
+| `draw_radar_chart(canvas, x, y, data)` | Teken radar chart |
+| `draw_performance_bar(canvas, y, data)` | Teken performance bar |
+
+### ColorScheme
+
+| Color | Usage |
+|-------|-------|
+| `primary` | Headers, accenten |
+| `secondary` | Secundaire accenten (goud) |
+| `text_primary` | Hoofdtekst |
+| `text_secondary` | Muted tekst |
+| `success/warning/danger` | Status kleuren |
+| `chart_primary/secondary/background` | Chart kleuren |
+
+## Licentie
+
+Intern gebruik - KAA Gent
