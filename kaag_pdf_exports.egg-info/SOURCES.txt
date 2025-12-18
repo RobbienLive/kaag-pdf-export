@@ -1,0 +1,17 @@
+LICENSE
+README.md
+setup.py
+kaag_pdf/__init__.py
+kaag_pdf/colors.py
+kaag_pdf/components.py
+kaag_pdf/fonts.py
+kaag_pdf/generator.py
+kaag_pdf/styles.py
+kaag_pdf/assets/fonts/ivy-presto-display.ttf
+kaag_pdf/assets/fonts/obviously-bold.ttf
+kaag_pdf/assets/fonts/poppins-regular.ttf
+kaag_pdf_exports.egg-info/PKG-INFO
+kaag_pdf_exports.egg-info/SOURCES.txt
+kaag_pdf_exports.egg-info/dependency_links.txt
+kaag_pdf_exports.egg-info/requires.txt
+kaag_pdf_exports.egg-info/top_level.txt

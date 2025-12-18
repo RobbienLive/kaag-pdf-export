@@ -2,7 +2,7 @@
 KAAG PDF Exports Package
 A reusable Python package for generating styled PDF exports.
 """
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 setup(
     name="kaag-pdf-exports",
@@ -11,8 +11,7 @@ setup(
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="KAAG Development Team",
-    packages=find_packages(where="src"),
-    package_dir={"": "src"},
+    packages=find_namespace_packages(include=["kaag_pdf*"]),
     include_package_data=True,
     package_data={
         "kaag_pdf": ["assets/fonts/*.ttf", "assets/images/*"],
@@ -24,7 +23,6 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",

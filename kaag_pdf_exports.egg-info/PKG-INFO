@@ -1,3 +1,27 @@
+Metadata-Version: 2.4
+Name: kaag-pdf-exports
+Version: 0.2.0
+Summary: Centralized PDF export styling for KAAG projects
+Author: KAAG Development Team
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Requires-Python: >=3.9
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: reportlab>=4.0.0
+Dynamic: author
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
 # KAAG PDF Exports
 
 Een gecentraliseerde Python package voor het genereren van gestileerde PDF exports voor alle KAAG projecten met consistente branding.
