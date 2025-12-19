@@ -7,10 +7,10 @@ Building blocks for PDF generation: headers, footers, tables, charts, etc.
 
 from typing import Optional, List, Dict, Any, Tuple
 from dataclasses import dataclass
+import math
 from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.pagesizes import A4
-import math
 
 from .colors import ColorScheme, KAAG_COLORS, get_performance_color
 from .fonts import FONTS, get_font
@@ -26,7 +26,6 @@ class HeaderData:
     """Data for PDF header."""
     title: str
     subtitle: Optional[str] = None
-    date: Optional[str] = None
     logo_path: Optional[str] = None
 
 
@@ -90,62 +89,50 @@ class PDFHeader:
             y_position = A4[1] - self.styles.page_margin_top
         
         c = canvas
+        header_y = y_position - self.styles.header_height
         
         # Background bar
         r, g, b = self.colors.primary_normalized()
         c.setFillColorRGB(r, g, b)
-        c.rect(
-            0, y_position - self.styles.header_height,
-            page_width, self.styles.header_height,
-            fill=True, stroke=False
-        )
+        c.rect(0, header_y, page_width, self.styles.header_height, fill=True, stroke=False)
         
-        # Logo (if provided)
-        x_offset = self.styles.page_margin_left
+        # Logo (if provided) - positioned left
+        logo_x = 10 * mm
+        logo_y = header_y + (self.styles.header_height - self.styles.header_logo_height) / 2
+        
         if data.logo_path:
             try:
                 c.drawImage(
                     data.logo_path,
-                    x_offset,
-                    y_position - self.styles.header_height + 5 * mm,
+                    logo_x,
+                    logo_y,
                     width=self.styles.header_logo_width,
                     height=self.styles.header_logo_height,
                     preserveAspectRatio=True,
                     mask='auto'
                 )
-                x_offset += self.styles.header_logo_width + 5 * mm
-            except:
+                print(f"Logo drawn at {data.logo_path}")
+            except Exception as e:
                 pass  # Skip if logo can't be loaded
         
-        # Title
+        # Title and Subtitle in the center-right
         r, g, b = self.colors.get_normalized("text_light")
         c.setFillColorRGB(r, g, b)
         
-        title_font = get_font("HEADING", "Helvetica-Bold")
-        c.setFont(title_font, self.styles.font_size_title)
+        title_x = self.styles.page_margin_left + self.styles.header_logo_width + 10 * mm
+        title_y = header_y + self.styles.header_height - 8 * mm
         
-        title_y = y_position - 15 * mm
+        # Title
+        c.setFont(get_font("HEADING"), self.styles.font_size_h1)
+        c.drawString(title_x, title_y, data.title)
+        
+        # Subtitle (if present)
         if data.subtitle:
-            title_y = y_position - 12 * mm
+            subtitle_y = title_y - 8 * mm
+            c.setFont(get_font("BODY"), self.styles.font_size_h3)
+            c.drawString(title_x, subtitle_y, data.subtitle)
         
-        c.drawString(x_offset, title_y, data.title)
-        
-        # Subtitle
-        if data.subtitle:
-            c.setFont(get_font("SUBHEADING", "Helvetica"), self.styles.font_size_h2)
-            c.drawString(x_offset, y_position - 22 * mm, data.subtitle)
-        
-        # Date (right-aligned)
-        if data.date:
-            c.setFont(get_font("BODY", "Helvetica"), self.styles.font_size_small)
-            date_width = c.stringWidth(data.date, get_font("BODY", "Helvetica"), self.styles.font_size_small)
-            c.drawString(
-                page_width - self.styles.page_margin_right - date_width,
-                y_position - 12 * mm,
-                data.date
-            )
-        
-        return y_position - self.styles.header_height
+        return header_y
 
 
 class PDFFooter:
@@ -168,11 +155,11 @@ class PDFFooter:
     ) -> None:
         """Draw footer on the canvas."""
         c = canvas
-        y = self.styles.page_margin_bottom - 5 * mm
+        y = self.styles.page_margin_bottom - 3 * mm
         
         r, g, b = self.colors.text_secondary_normalized()
         c.setFillColorRGB(r, g, b)
-        c.setFont(get_font("BODY", "Helvetica"), self.styles.footer_font_size)
+        c.setFont(get_font("BODY"), 8)
         
         # Left text
         if data.left_text:
@@ -181,15 +168,15 @@ class PDFFooter:
         # Center text or page numbers
         if data.show_page_numbers:
             page_text = f"Pagina {current_page} van {data.total_pages}"
-            text_width = c.stringWidth(page_text, get_font("BODY", "Helvetica"), self.styles.footer_font_size)
+            text_width = c.stringWidth(page_text, get_font("BODY"), 8)
             c.drawString((page_width - text_width) / 2, y, page_text)
         elif data.center_text:
-            text_width = c.stringWidth(data.center_text, get_font("BODY", "Helvetica"), self.styles.footer_font_size)
+            text_width = c.stringWidth(data.center_text, get_font("BODY"), 8)
             c.drawString((page_width - text_width) / 2, y, data.center_text)
         
         # Right text
         if data.right_text:
-            text_width = c.stringWidth(data.right_text, get_font("BODY", "Helvetica"), self.styles.footer_font_size)
+            text_width = c.stringWidth(data.right_text, get_font("BODY"), 8)
             c.drawString(page_width - self.styles.page_margin_right - text_width, y, data.right_text)
 
 
@@ -221,47 +208,47 @@ class InfoBlock:
         c = canvas
         
         # Calculate height
-        row_height = self.styles.font_size_body * 1.5
-        height = len(items) * row_height + 4 * mm
+        row_height = 5 * mm
+        height = len(items) * row_height + 3 * mm
         if title:
-            height += 6 * mm
+            height += 5 * mm
         
         # Background
         r, g, b = self.colors.get_normalized("background_alt")
         c.setFillColorRGB(r, g, b)
-        c.roundRect(x, y - height, width, height, self.styles.corner_radius, fill=True, stroke=False)
+        c.rect(x, y - height, width, height, fill=True, stroke=False)
         
         # Border
         r, g, b = self.colors.get_normalized("border")
         c.setStrokeColorRGB(r, g, b)
         c.setLineWidth(self.styles.border_width_thin)
-        c.roundRect(x, y - height, width, height, self.styles.corner_radius, fill=False, stroke=True)
+        c.rect(x, y - height, width, height, fill=False, stroke=True)
         
-        current_y = y - 3 * mm
+        current_y = y - 2 * mm
         
         # Title
         if title:
             r, g, b = self.colors.primary_normalized()
             c.setFillColorRGB(r, g, b)
-            c.setFont(get_font("SUBHEADING", "Helvetica-Bold"), self.styles.font_size_h3)
-            c.drawString(x + 3 * mm, current_y - 3 * mm, title)
-            current_y -= 6 * mm
+            c.setFont(get_font("SUBHEADING"), 11)
+            c.drawString(x + 2 * mm, current_y - 3 * mm, title)
+            current_y -= 5 * mm
         
         # Items
         for label, value in items:
-            current_y -= row_height
-            
             # Label
             r, g, b = self.colors.text_secondary_normalized()
             c.setFillColorRGB(r, g, b)
-            c.setFont(get_font("BODY", "Helvetica"), self.styles.font_size_small)
-            c.drawString(x + 3 * mm, current_y, f"{label}:")
+            c.setFont(get_font("BODY"), 9)
+            c.drawString(x + 2 * mm, current_y, f"{label}:")
             
             # Value
             r, g, b = self.colors.text_primary_normalized()
             c.setFillColorRGB(r, g, b)
-            c.setFont(get_font("BODY_BOLD", "Helvetica-Bold"), self.styles.font_size_body)
-            c.drawString(x + width * 0.4, current_y, str(value))
+            c.setFont(get_font("BODY_BOLD"), 10)
+            c.drawString(x + width * 0.35, current_y, str(value))
+            
+            current_y -= row_height
         
         return y - height - 2 * mm
 
@@ -296,20 +283,20 @@ class SectionHeader:
         if width is None:
             width = A4[0] - 2 * self.styles.page_margin_left
         
-        # Accent line
+        # Accent line (left)
         if show_line:
             r, g, b = self.colors.secondary_normalized()
             c.setStrokeColorRGB(r, g, b)
             c.setLineWidth(self.styles.border_width_thick)
-            c.line(x, y - 1 * mm, x + 15 * mm, y - 1 * mm)
+            c.line(x, y - 2 * mm, x + 15 * mm, y - 2 * mm)
         
         # Title text
         r, g, b = self.colors.primary_normalized()
         c.setFillColorRGB(r, g, b)
-        c.setFont(get_font("HEADING", "Helvetica-Bold"), self.styles.font_size_h2)
-        c.drawString(x, y - 6 * mm, title)
+        c.setFont(get_font("HEADING"), 13)
+        c.drawString(x, y - 7 * mm, title)
         
-        return y - self.styles.section_spacing
+        return y - 12 * mm
 
 
 class StatsTable:
@@ -343,24 +330,26 @@ class StatsTable:
             total_width = A4[0] - 2 * self.styles.page_margin_left
             col_widths = [total_width / len(headers)] * len(headers)
         
+        total_width = sum(col_widths)
+        header_height = 6 * mm
+        row_height = 5 * mm
+        
         # Header row
         r, g, b = self.colors.primary_normalized()
         c.setFillColorRGB(r, g, b)
+        c.rect(x, y - header_height, total_width, header_height, fill=True, stroke=False)
         
-        total_width = sum(col_widths)
-        c.rect(x, y - self.styles.table_header_height, total_width, self.styles.table_header_height, fill=True)
-        
-        # Header text
+        # Header text (white on blue)
         r, g, b = self.colors.get_normalized("text_light")
         c.setFillColorRGB(r, g, b)
-        c.setFont(get_font("SUBHEADING", "Helvetica-Bold"), self.styles.font_size_small)
+        c.setFont(get_font("LABEL"), 9)
         
         col_x = x
         for header, width in zip(headers, col_widths):
-            c.drawString(col_x + self.styles.table_cell_padding, y - 5 * mm, header)
+            c.drawString(col_x + 2 * mm, y - 4.5 * mm, header)
             col_x += width
         
-        current_y = y - self.styles.table_header_height
+        current_y = y - header_height
         
         # Data rows
         for row_idx, row in enumerate(rows):
@@ -368,19 +357,19 @@ class StatsTable:
             if row_idx % 2 == 1:
                 r, g, b = self.colors.get_normalized("background_alt")
                 c.setFillColorRGB(r, g, b)
-                c.rect(x, current_y - self.styles.table_row_height, total_width, self.styles.table_row_height, fill=True, stroke=False)
+                c.rect(x, current_y - row_height, total_width, row_height, fill=True, stroke=False)
             
             # Row data
             r, g, b = self.colors.text_primary_normalized()
             c.setFillColorRGB(r, g, b)
-            c.setFont(get_font("BODY", "Helvetica"), self.styles.font_size_small)
+            c.setFont(get_font("BODY"), 9)
             
             col_x = x
             for cell, width in zip(row, col_widths):
-                c.drawString(col_x + self.styles.table_cell_padding, current_y - 4 * mm, str(cell))
+                c.drawString(col_x + 2 * mm, current_y - 4 * mm, str(cell))
                 col_x += width
             
-            current_y -= self.styles.table_row_height
+            current_y -= row_height
         
         return current_y - 2 * mm
 
@@ -490,13 +479,13 @@ class RadarChart:
         # Draw labels
         r, g, b = self.colors.text_primary_normalized()
         c.setFillColorRGB(r, g, b)
-        c.setFont(get_font("SMALL", "Helvetica"), 7)
+        c.setFont(get_font("BODY"), 7)
         
         for angle, label in zip(angles, data.labels):
             x, y = get_point(angle, radius + 8 * mm)
             
             # Adjust text position based on angle
-            text_width = c.stringWidth(label, get_font("SMALL", "Helvetica"), 7)
+            text_width = c.stringWidth(label, get_font("BODY"), 7)
             
             # Horizontal centering based on position
             if abs(math.cos(angle - math.pi / 2)) < 0.1:  # Top or bottom
@@ -552,7 +541,7 @@ class PerformanceBar:
         # Label
         r, g, b = self.colors.text_primary_normalized()
         c.setFillColorRGB(r, g, b)
-        c.setFont(get_font("BODY", "Helvetica"), self.styles.font_size_small)
+        c.setFont(get_font("BODY"), 9)
         c.drawString(x, y - bar_height / 2 - 1, data.label)
         
         bar_x = x + label_width
@@ -578,16 +567,16 @@ class PerformanceBar:
         if show_value:
             r, g, b = self.colors.text_secondary_normalized()
             c.setFillColorRGB(r, g, b)
-            c.setFont(get_font("BODY", "Helvetica"), self.styles.font_size_small - 1)
+            c.setFont(get_font("BODY"), 8)
             value_str = f"{data.value:.1f}"
             c.drawString(text_x, y - bar_height / 2 - 1, value_str)
-            text_x += c.stringWidth(value_str, get_font("BODY", "Helvetica"), self.styles.font_size_small - 1) + 3 * mm
+            text_x += c.stringWidth(value_str, get_font("BODY"), 8) + 3 * mm
         
         if show_percentile:
             bar_color = get_performance_color(data.percentile)
             r, g, b = bar_color[0] / 255, bar_color[1] / 255, bar_color[2] / 255
             c.setFillColorRGB(r, g, b)
-            c.setFont(get_font("BODY_BOLD", "Helvetica-Bold"), self.styles.font_size_small)
+            c.setFont(get_font("BODY_BOLD"), 9)
             c.drawString(text_x, y - bar_height / 2 - 1, f"Top {data.percentile:.0f}%")
         
         return y - bar_height - self.styles.item_spacing

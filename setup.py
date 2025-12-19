@@ -6,7 +6,7 @@ from setuptools import setup, find_namespace_packages
 
 setup(
     name="kaag-pdf-exports",
-    version="0.2.0",
+    version="0.2.9",
     description="Centralized PDF export styling for KAAG projects",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

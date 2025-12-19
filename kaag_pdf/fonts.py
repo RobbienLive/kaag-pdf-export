@@ -69,8 +69,7 @@ FONT_FAMILIES = {
     "Poppins": FontFamily(
         name="Poppins",
         regular="poppins-regular.ttf",
-        # Add more variants when available:
-        # bold="poppins-bold.ttf",
+        # bold="poppins-bold.ttf",  # Alleen als dit bestand bestaat!
         # italic="poppins-italic.ttf",
         # semibold="poppins-semibold.ttf",
         # light="poppins-light.ttf",
@@ -78,10 +77,7 @@ FONT_FAMILIES = {
     ),
     "Obviously": FontFamily(
         name="Obviously",
-        # Note: only bold currently available, use as "regular"
-        regular="obviously-bold.ttf",
-        bold="obviously-bold.ttf",
-        # semibold="obviously-semibold.ttf",
+        regular="obviously-bold.ttf",  # Gebruik deze als regular én bold
     ),
     "IvyPresto": FontFamily(
         name="IvyPresto",
@@ -95,29 +91,32 @@ FONT_FAMILIES = {
 FONTS = {
     # Poppins family
     "POPPINS_REGULAR": "Poppins-Regular",
-    "POPPINS_BOLD": "Poppins-Bold",
-    "POPPINS_SEMIBOLD": "Poppins-SemiBold",
-    "POPPINS_LIGHT": "Poppins-Light",
-    "POPPINS_MEDIUM": "Poppins-Medium",
-    "POPPINS_ITALIC": "Poppins-Italic",
-    
+    # Alleen Regular beschikbaar
+    # "POPPINS_BOLD": "Poppins-Bold",
+    # "POPPINS_SEMIBOLD": "Poppins-SemiBold",
+    # "POPPINS_LIGHT": "Poppins-Light",
+    # "POPPINS_MEDIUM": "Poppins-Medium",
+    # "POPPINS_ITALIC": "Poppins-Italic",
+
     # Obviously family
     "OBVIOUSLY_REGULAR": "Obviously-Regular",
-    "OBVIOUSLY_BOLD": "Obviously-Bold",
-    "OBVIOUSLY_SEMIBOLD": "Obviously-SemiBold",
-    
+    # Alleen Regular beschikbaar
+    # "OBVIOUSLY_BOLD": "Obviously-Bold",
+    # "OBVIOUSLY_SEMIBOLD": "Obviously-SemiBold",
+
     # IvyPresto family
-    "IVYPRESTO_REGULAR": "IvyPrestoDisplay-Regular",
-    "IVYPRESTO_ITALIC": "IvyPrestoDisplay-Italic",
-    
+    "IVYPRESTO_REGULAR": "IvyPresto-Regular",
+    # Alleen Regular beschikbaar
+    # "IVYPRESTO_ITALIC": "IvyPresto-Italic",
+
     # Aliases for common uses
-    "HEADING": "Obviously-Bold",
-    "SUBHEADING": "Poppins-SemiBold",
+    "HEADING": "IvyPresto-Regular",
+    "SUBHEADING": "Obviously-Regular",
     "BODY": "Poppins-Regular",
-    "BODY_BOLD": "Poppins-Bold",
-    "ACCENT": "IvyPrestoDisplay-Italic",
-    "LABEL": "Poppins-Medium",
-    "SMALL": "Poppins-Light",
+    # "BODY_BOLD": "Poppins-Bold",  # Alleen als beschikbaar
+    # "ACCENT": "IvyPresto-Italic", # Alleen als beschikbaar
+    # "LABEL": "Poppins-Medium",    # Alleen als beschikbaar
+    # "SMALL": "Poppins-Light",     # Alleen als beschikbaar
 }
 
 
@@ -280,6 +279,7 @@ def get_font_manager() -> FontManager:
     if _default_manager is None:
         _default_manager = FontManager()
         _default_manager.register_fonts()
+        print("[FontManager] Registered fonts:", _default_manager.registered_fonts)
     return _default_manager
 
 
@@ -294,4 +294,6 @@ def get_font(font_key: str, fallback: str = "Helvetica") -> str:
     Returns:
         The font name to use
     """
-    return get_font_manager().get_font(font_key, fallback)
+    font_name = get_font_manager().get_font(font_key, fallback)
+    print(f"[FontManager] get_font('{font_key}') -> '{font_name}'")
+    return font_name

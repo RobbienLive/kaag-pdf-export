@@ -19,16 +19,26 @@ Usage:
     pdf.save("report.pdf")
 """
 
+from .generator import (
+    PDFGenerator,
+    create_radar_chart,
+)
 from .colors import (
     ColorScheme,
     KAAG_COLORS,
     KAAG_COLORS_LIGHT,
     CHART_PALETTE,
     PERFORMANCE_GRADIENT,
+    get_performance_color,
+    interpolate_color,
 )
-from .fonts import FontManager, FONTS
-from .styles import PDFStyles
+from .fonts import FontManager, FONTS, get_font
+from .styles import PDFStyles, DEFAULT_STYLES
 from .components import (
+    HeaderData,
+    FooterData,
+    RadarChartData,
+    PerformanceBarData,
     PDFHeader,
     PDFFooter,
     InfoBlock,
@@ -37,18 +47,27 @@ from .components import (
     RadarChart,
     PerformanceBar,
 )
-from .generator import PDFGenerator
 
 __version__ = "0.2.0"
 __all__ = [
+    "PDFGenerator",
+    "create_radar_chart",
     "ColorScheme",
     "KAAG_COLORS",
     "KAAG_COLORS_LIGHT",
     "CHART_PALETTE",
     "PERFORMANCE_GRADIENT",
+    "get_performance_color",
+    "interpolate_color",
     "FontManager",
     "FONTS",
+    "get_font",
     "PDFStyles",
+    "DEFAULT_STYLES",
+    "HeaderData",
+    "FooterData",
+    "RadarChartData",
+    "PerformanceBarData",
     "PDFHeader",
     "PDFFooter",
     "InfoBlock",
@@ -56,5 +75,4 @@ __all__ = [
     "StatsTable",
     "RadarChart",
     "PerformanceBar",
-    "PDFGenerator",
 ]

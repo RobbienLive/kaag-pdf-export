@@ -39,6 +39,7 @@ class ColorScheme:
         chart_background: Chart background/grid color
     """
     primary: RGBColor
+    primary_dark: RGBColor
     secondary: RGBColor
     text_primary: RGBColor
     text_secondary: RGBColor
@@ -56,6 +57,10 @@ class ColorScheme:
     def primary_normalized(self) -> Tuple[float, float, float]:
         """Get primary color normalized to 0-1 range for ReportLab."""
         return self._normalize(self.primary)
+    
+    def primary_dark_normalized(self) -> Tuple[float, float, float]:
+        """Get primary_dark color normalized to 0-1 range for ReportLab."""
+        return self._normalize(self.primary_dark)
     
     def secondary_normalized(self) -> Tuple[float, float, float]:
         """Get secondary color normalized to 0-1 range for ReportLab."""
@@ -96,6 +101,7 @@ class ColorScheme:
 KAAG_COLORS = ColorScheme(
     # Brand colors (from index.css)
     primary=(0, 80, 160),          # #0050a0
+    primary_dark=(29, 67, 109),     # #1d436d
     secondary=(151, 188, 200),     # #97bcc8
     text_primary=(33, 53, 71),     # #213547
     text_secondary=(107, 114, 128),# #6b7280
@@ -121,6 +127,7 @@ KAAG_COLORS = ColorScheme(
 KAAG_COLORS_LIGHT = ColorScheme(
     # Slightly lighter variant for dense tables
     primary=(0, 95, 180),          # lighten primary
+    primary_dark=(49, 87, 130),    # lighten primary_dark
     secondary=(173, 205, 214),     # lighten secondary
     text_primary=(51, 65, 85),     # darker slate
     text_secondary=(125, 135, 148),
